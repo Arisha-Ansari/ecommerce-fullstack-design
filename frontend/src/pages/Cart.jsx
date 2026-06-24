@@ -1,40 +1,7 @@
-import React, { useState } from "react";
-
-const cartItems = [
-  {
-    id: 1,
-    title: "T-shirts with multiple colors, for men and lady",
-    size: "medium",
-    color: "blue",
-    material: "Plastic",
-    seller: "Artel Market",
-    price: 78.99,
-    qty: 9,
-    img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop",
-  },
-  {
-    id: 2,
-    title: "T-shirts with multiple colors, for men and lady",
-    size: "medium",
-    color: "blue",
-    material: "Plastic",
-    seller: "Best factory LLC",
-    price: 39.0,
-    qty: 3,
-    img: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=80&h=80&fit=crop",
-  },
-  {
-    id: 3,
-    title: "T-shirts with multiple colors, for men and lady",
-    size: "medium",
-    color: "blue",
-    material: "Plastic",
-    seller: "Artel Market",
-    price: 170.5,
-    qty: 1,
-    img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=80&h=80&fit=crop",
-  },
-];
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { CartContext } from "../context/CartContext";
+import { Trash2, Heart, Shield, Headphones, Truck, ShoppingCart } from "lucide-react";
 
 const savedItems = [
   {
@@ -64,12 +31,35 @@ const savedItems = [
 ];
 
 export default function Cart() {
+  const navigate = useNavigate();
+  const { cart, removeFromCart, updateQuantity } = useContext(CartContext);
   const [coupon, setCoupon] = useState("");
 
-  const subtotal = 1403.97;
-  const discount = 80.0;
-  const tax = 14.0;
+  // Calculate totals
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discount = subtotal > 5000 ? 500 : 0;
+  const tax = Math.round(subtotal * 0.02);
   const total = subtotal - discount + tax;
+
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-100 px-4 py-6 font-sans">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center py-12">
+            <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
+            <p className="text-gray-600 mb-6">Add some products to get started!</p>
+            <button 
+              onClick={() => navigate('/products')}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-6 font-sans">
@@ -77,7 +67,7 @@ export default function Cart() {
 
         {/* Title */}
         <h2 className="text-xl font-bold text-gray-800">
-          My cart ({cartItems.length})
+          My cart ({cart.length})
         </h2>
 
         {/* Main Layout: LEFT items + RIGHT summary */}
@@ -86,34 +76,42 @@ export default function Cart() {
           {/* LEFT: Cart Items */}
           <div className="flex flex-col gap-3 flex-1">
 
-            {cartItems.map((item) => (
-              <div key={item.id} className="flex gap-4 bg-white rounded-xl p-4 shadow-sm items-start">
+            {cart.map((item) => (
+              <div key={item._id} className="flex gap-4 bg-white rounded-xl p-4 shadow-sm items-start">
                 <img
-                  src={item.img}
-                  alt={item.title}
+                  src={item.image}
+                  alt={item.name}
                   className="w-20 h-20 object-cover rounded-lg flex-shrink-0 bg-gray-100"
                 />
                 <div className="flex-1 flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-gray-800 leading-snug">{item.title}</p>
+                  <p className="text-sm font-semibold text-gray-800 leading-snug">{item.name}</p>
                   <p className="text-xs text-gray-400">
-                    Size: {item.size}, Color: {item.color}, Material: {item.material}
+                    Category: {item.category}
                   </p>
-                  <p className="text-xs text-gray-400">Seller: {item.seller}</p>
+                  <p className="text-xs text-gray-400 line-clamp-2">
+                    {item.description}
+                  </p>
                   <div className="flex gap-2 mt-2">
-                    <button className="text-sm px-3 py-1 rounded-md border border-gray-200 text-red-500 hover:bg-red-50 hover:border-red-300 hover:text-red-500 transition-all">
+                    <button 
+                      onClick={() => removeFromCart(item._id)}
+                      className="text-sm px-3 py-1 rounded-md border border-gray-200 text-red-500 hover:bg-red-50 hover:border-red-300 flex items-center gap-1 transition-all"
+                    >
+                      <Trash2 size={14} />
                       Remove
                     </button>
-                    <button className="text-sm px-3 py-1 rounded-md border border-gray-200 text-blue-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500 transition-all">
+                    <button className="text-sm px-3 py-1 rounded-md border border-gray-200 text-blue-500 hover:bg-blue-50 hover:border-blue-300 flex items-center gap-1 transition-all">
+                      <Heart size={14} />
                       Save for later
                     </button>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <p className="text-base font-bold text-gray-800">${item.price.toFixed(2)}</p>
+                  <p className="text-base font-bold text-gray-800">Rs. {item.price.toFixed(0)}</p>
                   <div className="flex items-center gap-1 text-sm text-gray-500">
                     <label>Qty:</label>
                     <select
-                      defaultValue={item.qty}
+                      value={item.quantity}
+                      onChange={(e) => updateQuantity(item._id, parseInt(e.target.value))}
                       className="border border-gray-200 rounded-md px-2 py-1 text-sm bg-gray-50 cursor-pointer"
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -127,7 +125,10 @@ export default function Cart() {
 
             {/* Back / Remove All */}
             <div className="flex justify-between items-center bg-white rounded-xl px-4 py-3 shadow-sm">
-              <button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all">
+              <button 
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all"
+              >
                 ← Back to shop
               </button>
               <button className="text-sm font-semibold border border-red-300 px-4 py-2 rounded-lg text-red-500 hover:bg-red-50 transition-all">
@@ -138,13 +139,13 @@ export default function Cart() {
             {/* Trust Badges */}
             <div className="flex flex-col sm:flex-row gap-4 bg-white rounded-xl p-5 shadow-sm">
               {[
-                { icon: "ti-lock", title: "Secure payment", sub: "Have you ever finally just", bg: "bg-amber-50", text: "text-amber-500" },
-                { icon: "ti-headphones", title: "Customer support", sub: "Have you ever finally just", bg: "bg-blue-50", text: "text-blue-500" },
-                { icon: "ti-truck-delivery", title: "Free delivery", sub: "Have you ever finally just", bg: "bg-green-50", text: "text-green-500" },
-              ].map((badge) => (
-                <div key={badge.title} className="flex items-center gap-3 flex-1">
+                { Icon: Shield, title: "Secure payment", sub: "Protected transactions", color: "text-amber-500", bg: "bg-amber-50" },
+                { Icon: Headphones, title: "Customer support", sub: "24/7 assistance", color: "text-blue-500", bg: "bg-blue-50" },
+                { Icon: Truck, title: "Free delivery", sub: "On orders above Rs. 5000", color: "text-green-500", bg: "bg-green-50" },
+              ].map((badge, idx) => (
+                <div key={idx} className="flex items-center gap-3 flex-1">
                   <div className={`w-11 h-11 rounded-lg ${badge.bg} flex items-center justify-center flex-shrink-0`}>
-                    <i className={`ti ${badge.icon} text-2xl ${badge.text}`}></i>
+                    <badge.Icon size={20} className={badge.color} />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-800">{badge.title}</p>
@@ -181,15 +182,17 @@ export default function Cart() {
             <div className="flex flex-col gap-3">
               <div className="flex justify-between text-sm text-gray-500">
                 <span>Subtotal:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>Rs. {subtotal.toFixed(0)}</span>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Discount:</span>
+                  <span className="text-green-600 font-semibold">-Rs. {discount.toFixed(0)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Discount:</span>
-                <span className="text-green-600 font-semibold">-${discount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Tax:</span>
-                <span className="text-red-500">+${tax.toFixed(2)}</span>
+                <span className="text-gray-500">Tax (2%):</span>
+                <span className="text-red-500">+Rs. {tax.toFixed(0)}</span>
               </div>
             </div>
 
@@ -197,11 +200,11 @@ export default function Cart() {
 
             <div className="flex justify-between text-base font-bold text-gray-800">
               <span>Total:</span>
-              <span>${total.toFixed(2)}</span>
+              <span>Rs. {total.toFixed(0)}</span>
             </div>
 
-            <button className="w-full py-3 bg-blue-500 text-white rounded-lg text-sm font-bold hover:bg-blue-600 transition-all tracking-wide">
-              <i className="ti ti-shopping-cart text-sm"></i>
+            <button className="w-full py-3 bg-blue-500 text-white rounded-lg text-sm font-bold hover:bg-blue-600 transition-all tracking-wide flex items-center justify-center gap-2">
+              <ShoppingCart size={18} />
               Checkout
             </button>
 
@@ -249,10 +252,10 @@ export default function Cart() {
                   className="w-full h-32 object-cover bg-gray-100"
                 />
                 <div className="p-2 flex flex-col gap-1 flex-1">
-                  <p className="text-sm font-bold text-gray-800">${item.price.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-gray-800">Rs. {item.price.toFixed(0)}</p>
                   <p className="text-xs text-gray-500 leading-snug">{item.title}</p>
-                  <button className="mt-auto text-sm border border-blue-400 text-blue-500 rounded-md py-1.5 hover:bg-blue-500 hover:text-white transition-all font-semibold">
-                    <i className="ti ti-shopping-cart text-sm"></i>
+                  <button className="mt-auto text-sm border border-blue-400 text-blue-500 rounded-md py-1.5 hover:bg-blue-500 hover:text-white transition-all font-semibold flex items-center justify-center gap-1">
+                    <ShoppingCart size={14} />
                     Move to cart
                   </button>
                 </div>
@@ -264,10 +267,13 @@ export default function Cart() {
         {/* Promo Banner - full width */}
         <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="text-white">
-            <p className="text-base font-bold">Super discount on more than 100 USD</p>
-            <p className="text-sm opacity-80 mt-1">Have you ever finally just write dummy info</p>
+            <p className="text-base font-bold">Super discount on orders above Rs. 5000</p>
+            <p className="text-sm opacity-80 mt-1">Get free delivery + Rs. 500 discount</p>
           </div>
-          <button className="px-5 py-2.5 bg-white text-blue-700 font-bold text-sm rounded-lg hover:bg-gray-100 transition-all whitespace-nowrap">
+          <button 
+            onClick={() => navigate('/products')}
+            className="px-5 py-2.5 bg-white text-blue-700 font-bold text-sm rounded-lg hover:bg-gray-100 transition-all whitespace-nowrap"
+          >
             Shop now
           </button>
         </div>

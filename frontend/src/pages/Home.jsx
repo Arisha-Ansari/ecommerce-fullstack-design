@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactCountryFlag from "react-country-flag";
 import { User, Search, Archive, Send, Globe } from "lucide-react";
+import { getProducts } from "../services/api";
 
 const categories = [
   "Automobiles",
@@ -14,13 +15,6 @@ const categories = [
   "More category",
 ];
 
-const dealProducts = [
-  { name: "Smart watches", discount: "-25%", img: "https://picsum.photos/seed/dealwatch/120/120" },
-  { name: "Laptops", discount: "-15%", img: "https://picsum.photos/seed/deallaptop/120/120" },
-  { name: "GoPro cameras", discount: "-40%", img: "https://picsum.photos/seed/dealgopro/120/120" },
-  { name: "Headphones", discount: "-25%", img: "https://picsum.photos/seed/dealheadphones/120/120" },
-  { name: "Canon cameras", discount: "-25%", img: "https://picsum.photos/seed/dealcanon/120/120" },
-];
 
 const timer = [
   { label: "Days", value: "04" },
@@ -29,26 +23,12 @@ const timer = [
   { label: "Sec", value: "56" },
 ];
 
-const homeOutdoorProducts = [
-  { name: "Soft chairs", price: 19, img: "https://loremflickr.com/200/200/armchair?lock=101" },
-  { name: "Sofa & chair", price: 19, img: "https://loremflickr.com/200/200/tablelamp?lock=102" },
-  { name: "Kitchen dishes", price: 19, img: "https://loremflickr.com/200/200/airmattress?lock=103" },
-  { name: "Smart watches", price: 19, img: "https://loremflickr.com/200/200/terracottapot?lock=104" },
-  { name: "Kitchen mixer", price: 100, img: "https://loremflickr.com/200/200/foodprocessor?lock=105" },
-  { name: "Blenders", price: 39, img: "https://loremflickr.com/200/200/coffeemachine?lock=106" },
-  { name: "Home appliance", price: 19, img: "https://loremflickr.com/200/200/fileorganizer?lock=107" },
-  { name: "Coffee maker", price: 10, img: "https://loremflickr.com/200/200/pottedplant?lock=108" },
-];
-
-const electronicsProducts = [
-  { name: "Smart watches", price: 19, img: "https://loremflickr.com/200/200/applewatch?lock=201" },
-  { name: "Cameras", price: 89, img: "https://loremflickr.com/200/200/dslrcamera?lock=202" },
-  { name: "Headphones", price: 10, img: "https://loremflickr.com/200/200/headphones?lock=203" },
-  { name: "Smart watches", price: 90, img: "https://loremflickr.com/200/200/travelmug?lock=204" },
-  { name: "Gaming set", price: 35, img: "https://loremflickr.com/200/200/gamingheadset?lock=205" },
-  { name: "Laptops & PC", price: 340, img: "https://loremflickr.com/200/200/laptop?lock=206" },
-  { name: "Smartphones", price: 19, img: "https://loremflickr.com/200/200/tablet?lock=207" },
-  { name: "Electric kettle", price: 240, img: "https://loremflickr.com/200/200/electrickettle?lock=208" },
+const dealProducts = [
+  { name: "Smart watches", discount: "-25%", img: "https://picsum.photos/seed/dealwatch/120/120" },
+  { name: "Laptops", discount: "-15%", img: "https://picsum.photos/seed/deallaptop/120/120" },
+  { name: "GoPro cameras", discount: "-40%", img: "https://picsum.photos/seed/dealgopro/120/120" },
+  { name: "Headphones", discount: "-25%", img: "https://picsum.photos/seed/dealheadphones/120/120" },
+  { name: "Canon cameras", discount: "-25%", img: "https://picsum.photos/seed/dealcanon/120/120" },
 ];
 
 const recommendedItems = [
@@ -123,6 +103,12 @@ function CategoryShowcase({ title, bgImage, products }) {
 }
 
 export default function Home() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    getProducts().then(data => setProducts(data));
+  }, []);
+
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900 font-sans">
       {/* Hero */}
@@ -218,12 +204,12 @@ export default function Home() {
         <CategoryShowcase
           title="Home and outdoor"
           bgImage="https://loremflickr.com/400/400/livingroom,sofa?lock=301"
-          products={homeOutdoorProducts}
+          products={products}
         />
         <CategoryShowcase
           title="Consumer electronics and gadgets"
           bgImage="https://loremflickr.com/400/400/gadgets,electronics?lock=302"
-          products={electronicsProducts}
+          products={products}
         />
       </section>
 

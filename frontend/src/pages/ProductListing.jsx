@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronDown,
   Heart,
@@ -8,17 +9,7 @@ import {
   Star,
   Menu,
 } from "lucide-react";
-
-const products = [
-  { id: 1, name: "GoPro HERO6 4K Action Camera - Black", price: 998.00, originalPrice: 1128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/gopro1/200/200", free: true },
-  { id: 2, name: "Canon Camera EOS 2000, Black 10x zoom", price: 998.00, originalPrice: 1128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/canon1/200/200", free: true },
-  { id: 3, name: "Smart Watch Silver", price: 99.50, originalPrice: 128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/watch1/200/200", free: false },
-  { id: 4, name: "Smartphone Blue", price: 99.50, originalPrice: 128.00, rating: 5.9, reviews: 154, image: "https://picsum.photos/seed/phone1/200/200", free: false },
-  { id: 5, name: "Laptop Pro", price: 99.50, originalPrice: 128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/laptop1/200/200", free: false },
-  { id: 6, name: "Headphones Wireless", price: 99.50, originalPrice: 128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/headphones1/200/200", free: false },
-  { id: 7, name: "Tablet Device", price: 99.50, originalPrice: 128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/tablet1/200/200", free: false },
-  { id: 8, name: "Camera DSLR", price: 99.50, originalPrice: 128.00, rating: 7.5, reviews: 154, image: "https://picsum.photos/seed/dslr1/200/200", free: false },
-];
+import { getProducts } from "../services/api";
 
 const categories = ["Mobile accessory", "Electronics", "Smartphones", "Modern tech"];
 const brands = [
@@ -59,60 +50,49 @@ function StarRating({ rating }) {
   );
 }
 
-function ProductCard({ product, isListView }) {
+function ProductCard({ product, isListView, onProductClick }) {
   if (isListView) {
     return (
       <div className="border border-gray-200 rounded-lg p-3 sm:p-4 flex gap-3 sm:gap-5 mb-4 bg-white hover:shadow-md transition-shadow">
-        {/* Image - Responsive */}
         <img src={product.image} alt={product.name} className="w-24 h-20 sm:w-40 sm:h-32 object-cover rounded flex-shrink-0" />
-
-        {/* Content */}
         <div className="flex-1 flex flex-col justify-between min-w-0">
           <div>
             <h3 className="text-xs sm:text-sm lg:text-lg font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-2">{product.name}</h3>
-
             <div className="flex items-center gap-2 mb-1 sm:mb-2 flex-wrap">
-              <span className="text-sm sm:text-lg font-bold text-gray-900">${product.price}</span>
-              <span className="text-xs text-gray-400 line-through">${product.originalPrice}</span>
+              <span className="text-sm sm:text-lg font-bold text-gray-900">Rs. {product.price}</span>
             </div>
-
             <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
-              <StarRating rating={product.rating} />
-              <span className="text-xs text-gray-500">{product.reviews} orders</span>
-              {product.free && <span className="text-xs text-green-600 font-medium">Free Shipping</span>}
+              <StarRating rating={product.stock} />
+              <span className="text-xs text-gray-500">Stock: {product.stock}</span>
             </div>
-
             <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 line-clamp-2 hidden sm:block">
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              {product.description}
             </p>
           </div>
-
-          <a href="#" className="text-xs text-blue-600 font-medium inline-block">
+          <button
+            onClick={() => onProductClick(product._id)}
+            className="text-xs text-blue-600 font-medium inline-block hover:underline"
+          >
             View details
-          </a>
+          </button>
         </div>
-
-        {/* Heart Icon - Responsive */}
         <Heart className="text-blue-500 hover:text-red-600 cursor-pointer flex-shrink-0 mt-1" size={24} />
       </div>
     );
   }
 
-  // Grid View - Responsive
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
+    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow cursor-pointer" onClick={() => onProductClick(product._id)}>
       <div className="relative">
         <img src={product.image} alt={product.name} className="w-full h-32 sm:h-48 lg:h-64 object-cover" />
         <Heart className="absolute top-2 right-2 sm:top-3 sm:right-3 text-blue-500 hover:text-red-600 cursor-pointer bg-white rounded-full p-1.5 sm:p-2 shadow-md" size={40} />
       </div>
       <div className="p-2 sm:p-4">
         <div className="flex gap-2 mb-2">
-          <span className="text-sm sm:text-lg font-bold text-gray-900">${product.price}</span>
-          <span className="text-xs sm:text-sm text-gray-400 line-through">${product.originalPrice}</span>
+          <span className="text-sm sm:text-lg font-bold text-gray-900">Rs. {product.price}</span>
         </div>
-        <StarRating rating={product.rating} />
-        <span className="text-xs sm:text-sm text-gray-500 ml-1">{product.reviews} orders</span>
-        {product.free && <span className="text-xs text-green-600 font-medium ml-2">Free Shipping</span>}
+        <StarRating rating={product.stock} />
+        <span className="text-xs sm:text-sm text-gray-500 ml-1">Stock: {product.stock}</span>
         <p className="text-xs sm:text-sm font-medium text-gray-600 mt-2 line-clamp-2">{product.name}</p>
       </div>
     </div>
@@ -120,6 +100,12 @@ function ProductCard({ product, isListView }) {
 }
 
 export default function ProductListing() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
+
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [isGridView, setIsGridView] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({
@@ -131,7 +117,25 @@ export default function ProductListing() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    getProducts().then(data => {
+      setProducts(data);
+      setFilteredProducts(data);
+    });
   }, []);
+
+  useEffect(() => {
+    if (products.length === 0) return;
+    if (urlSearch) {
+      const filtered = products.filter(p =>
+        p.name.toLowerCase().includes(urlSearch.toLowerCase()) ||
+        p.category.toLowerCase().includes(urlSearch.toLowerCase()) ||
+        p.description.toLowerCase().includes(urlSearch.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [urlSearch, products]);
 
   const removeFilter = (type, value) => {
     setSelectedFilters(prev => ({
@@ -141,18 +145,17 @@ export default function ProductListing() {
   };
 
   const clearAllFilters = () => {
-    setSelectedFilters({
-      brands: [],
-      features: [],
-      ratings: [],
-    });
+    setSelectedFilters({ brands: [], features: [], ratings: [] });
   };
 
   const allFilters = [...selectedFilters.brands, ...selectedFilters.features, ...selectedFilters.ratings];
 
+  const handleProductClick = (productId) => {
+    navigate(`/products/${productId}`);
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900 font-sans">
-      {/* Overlay Backdrop for Mobile */}
       {showFilters && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
@@ -160,11 +163,9 @@ export default function ProductListing() {
         />
       )}
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4 grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-6">
-        {/* Sidebar - Mobile Drawer / Desktop */}
+        {/* Sidebar */}
         <div className={`fixed left-0 top-0 bottom-0 w-80 bg-white z-40 transform transition-transform duration-300 overflow-y-auto lg:relative lg:transform-none lg:w-auto lg:z-0 ${showFilters ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
-          {/* Mobile Header */}
           <div className="sticky top-0 bg-white p-4 border-b lg:hidden flex justify-between items-center z-50">
             <h2 className="font-bold">Filters</h2>
             <button onClick={() => setShowFilters(false)} className="text-gray-600 hover:text-gray-900">
@@ -174,7 +175,7 @@ export default function ProductListing() {
 
           <div className="p-4 lg:p-0">
             {/* Category */}
-            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 lg:border-gray-200 p-4 mb-4">
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Category</h3>
                 <ChevronDown size={16} />
@@ -184,11 +185,10 @@ export default function ProductListing() {
                   {cat}
                 </div>
               ))}
-              <div className="text-xs text-blue-600 font-medium mt-2 cursor-pointer">See all</div>
             </div>
 
             {/* Brands */}
-            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 lg:border-gray-200 p-4 mb-4">
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Brands</h3>
                 <ChevronDown size={16} />
@@ -203,7 +203,7 @@ export default function ProductListing() {
             </div>
 
             {/* Features */}
-            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 lg:border-gray-200 p-4 mb-4">
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Features</h3>
                 <ChevronDown size={16} />
@@ -217,7 +217,7 @@ export default function ProductListing() {
             </div>
 
             {/* Price Range */}
-            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 lg:border-gray-200 p-4 mb-4">
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Price range</h3>
                 <ChevronDown size={16} />
@@ -233,7 +233,7 @@ export default function ProductListing() {
             </div>
 
             {/* Condition */}
-            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 lg:border-gray-200 p-4 mb-4">
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Condition</h3>
                 <ChevronDown size={16} />
@@ -247,7 +247,7 @@ export default function ProductListing() {
             </div>
 
             {/* Ratings */}
-            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 lg:border-gray-200 p-4">
+            <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Ratings</h3>
                 <ChevronDown size={16} />
@@ -271,7 +271,7 @@ export default function ProductListing() {
           {/* Filter Pills */}
           <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 mb-3 sm:mb-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-3">
-              <span className="text-xs sm:text-sm font-medium">12,911 items in <strong>Mobile accessory</strong></span>
+              <span className="text-xs sm:text-sm font-medium">{filteredProducts.length} items found</span>
               <div className="flex items-center gap-2 flex-wrap">
                 <label className="flex items-center gap-2 text-xs cursor-pointer">
                   <input type="checkbox" className="w-4 h-4 accent-blue-600" />
@@ -308,7 +308,6 @@ export default function ProductListing() {
               </div>
             )}
 
-            {/* View Toggle & Mobile Filter Button */}
             <div className="flex gap-2 justify-between items-center">
               <button
                 onClick={() => setShowFilters(true)}
@@ -334,11 +333,30 @@ export default function ProductListing() {
           </div>
 
           {/* Products Grid/List */}
-          <div className={isGridView ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" : "block"}>
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} isListView={!isGridView} />
-            ))}
-          </div>
+          {filteredProducts.length === 0 && products.length > 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg border border-gray-200 text-center px-4">
+              <div className="text-5xl mb-4">🔍</div>
+              <h3 className="text-base font-semibold text-gray-800 mb-1">No results for "{urlSearch}"</h3>
+              <p className="text-xs text-gray-500 mb-5">Try different keywords or check your spelling</p>
+              <button
+                onClick={() => navigate('/products')}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition-all"
+              >
+                Clear search & browse all
+              </button>
+            </div>
+          ) : (
+            <div className={isGridView ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" : "block"}>
+              {filteredProducts.map(product => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  isListView={!isGridView}
+                  onProductClick={handleProductClick}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           <div className="flex items-center justify-between mt-4 sm:mt-6 flex-wrap gap-2">
@@ -354,8 +372,8 @@ export default function ProductListing() {
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`px-2 sm:px-3 py-1 sm:py-2 rounded text-xs ${currentPage === page
-                      ? "bg-blue-600 text-white"
-                      : "border border-gray-200 hover:bg-gray-50"
+                    ? "bg-blue-600 text-white"
+                    : "border border-gray-200 hover:bg-gray-50"
                     }`}
                 >
                   {page}
