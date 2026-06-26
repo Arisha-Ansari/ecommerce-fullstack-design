@@ -56,3 +56,35 @@ export const deleteProduct = async (id) => {
     console.error('Error deleting product:', error);
   }
 };
+// ── Auth APIs ─────────────────────────────────────────────────
+
+// Token header helper
+const authHeader = (token) => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${token}`,
+});
+
+export const loginUser = async (email, password) => {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+};
+
+export const registerUser = async (name, email, password) => {
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password }),
+  });
+  return res.json();
+};
+
+export const getMe = async (token) => {
+  const res = await fetch(`${API_URL}/auth/me`, {
+    headers: authHeader(token),
+  });
+  return res.json();
+};

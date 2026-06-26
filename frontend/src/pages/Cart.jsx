@@ -1,6 +1,6 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CartContext } from "../context/CartContext";
+import useCart from "../hooks/useCart";
 import { Trash2, Heart, Shield, Headphones, Truck, ShoppingCart } from "lucide-react";
 
 const savedItems = [
@@ -32,7 +32,7 @@ const savedItems = [
 
 export default function Cart() {
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateQuantity } = useContext(CartContext);
+  const { cart, removeFromCart, updateQuantity, clearCart, cartCount } = useCart();
   const [coupon, setCoupon] = useState("");
 
   // Calculate totals
@@ -67,7 +67,7 @@ export default function Cart() {
 
         {/* Title */}
         <h2 className="text-xl font-bold text-gray-800">
-          My cart ({cart.length})
+          My cart ({cartCount})
         </h2>
 
         {/* Main Layout: LEFT items + RIGHT summary */}
@@ -131,7 +131,7 @@ export default function Cart() {
               >
                 ← Back to shop
               </button>
-              <button className="text-sm font-semibold border border-red-300 px-4 py-2 rounded-lg text-red-500 hover:bg-red-50 transition-all">
+              <button onClick={clearCart} className="text-sm font-semibold border border-red-300 px-4 py-2 rounded-lg text-red-500 hover:bg-red-50 transition-all">
                 Remove all
               </button>
             </div>

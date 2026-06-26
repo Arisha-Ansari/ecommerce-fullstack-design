@@ -16,6 +16,11 @@ const seedProducts = async () => {
       {
         name: 'Wireless Headphones',
         price: 4999,
+        bulkPrices: [
+          { minQty: 1, maxQty: 9, price: 4999 },
+          { minQty: 10, maxQty: 49, price: 4499 },
+          { minQty: 50, maxQty: null, price: 3999 },
+        ],
         image: 'https://via.placeholder.com/300x300?text=Headphones',
         description: 'High-quality wireless headphones with noise cancellation',
         category: 'Electronics',
@@ -24,6 +29,11 @@ const seedProducts = async () => {
       {
         name: 'Laptop Stand',
         price: 1999,
+        bulkPrices: [
+          { minQty: 1, maxQty: 9, price: 1999 },
+          { minQty: 10, maxQty: 49, price: 1799 },
+          { minQty: 50, maxQty: null, price: 1599 },
+        ],
         image: 'https://via.placeholder.com/300x300?text=Laptop+Stand',
         description: 'Adjustable aluminum laptop stand for better posture',
         category: 'Accessories',
@@ -32,6 +42,11 @@ const seedProducts = async () => {
       {
         name: 'USB-C Cable',
         price: 499,
+        bulkPrices: [
+          { minQty: 1, maxQty: 9, price: 499 },
+          { minQty: 10, maxQty: 49, price: 449 },
+          { minQty: 50, maxQty: null, price: 399 },
+        ],
         image: 'https://via.placeholder.com/300x300?text=USB+Cable',
         description: 'Durable USB-C charging cable, 2 meters long',
         category: 'Cables',
@@ -40,6 +55,11 @@ const seedProducts = async () => {
       {
         name: 'Mechanical Keyboard',
         price: 7999,
+        bulkPrices: [
+          { minQty: 1, maxQty: 9, price: 7999 },
+          { minQty: 10, maxQty: 49, price: 7199 },
+          { minQty: 50, maxQty: null, price: 6399 },
+        ],
         image: 'https://via.placeholder.com/300x300?text=Keyboard',
         description: 'RGB Mechanical Keyboard with custom switches',
         category: 'Electronics',
@@ -48,6 +68,11 @@ const seedProducts = async () => {
       {
         name: 'Wireless Mouse',
         price: 2499,
+        bulkPrices: [
+          { minQty: 1, maxQty: 9, price: 2499 },
+          { minQty: 10, maxQty: 49, price: 2249 },
+          { minQty: 50, maxQty: null, price: 1999 },
+        ],
         image: 'https://via.placeholder.com/300x300?text=Mouse',
         description: 'Ergonomic wireless mouse with precision tracking',
         category: 'Electronics',
@@ -56,6 +81,11 @@ const seedProducts = async () => {
       {
         name: 'Phone Case',
         price: 799,
+        bulkPrices: [
+          { minQty: 1, maxQty: 9, price: 799 },
+          { minQty: 10, maxQty: 49, price: 699 },
+          { minQty: 50, maxQty: null, price: 599 },
+        ],
         image: 'https://via.placeholder.com/300x300?text=Phone+Case',
         description: 'Protective phone case with shock absorption',
         category: 'Accessories',

@@ -1,5 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useState } from "react";
+import useCart from "../hooks/useCart";
+import { useAuth } from "../context/AuthContext";
 import ReactCountryFlag from "react-country-flag";
 import {
   User,
@@ -9,12 +11,16 @@ import {
   Menu,
   ChevronDown,
   Search,
+  LogOut,
+  Package,
 } from "lucide-react";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchError, setSearchError] = useState(false);
+  const { cartCount } = useCart();
+  const { user, logout, isAdmin } = useAuth();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -24,6 +30,11 @@ export default function Navbar() {
       return;
     }
     navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -59,10 +70,53 @@ export default function Navbar() {
         </form>
 
         <div className="flex items-center gap-4 lg:gap-5 text-[11px] text-gray-600 shrink-0 ml-auto">
-          <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-600 transition">
-            <User size={18} />
-            Profile
-          </div>
+
+          {/* Profile / Login */}
+          {user ? (
+            <div className="flex items-center gap-4 lg:gap-5">
+              {/* User name + admin badge */}
+              <Link to="/profile" className="hidden sm:flex flex-col items-center gap-1 hover:text-blue-600 transition">
+                <User size={18} className="text-blue-600" />
+                <span className="text-blue-600 font-semibold max-w-[70px] truncate">
+                  {user.name.split(' ')[0]}
+                </span>
+                {isAdmin && (
+                  <span className="bg-blue-100 text-blue-600 text-[9px] font-bold px-1.5 rounded-full -mt-1">
+                    ADMIN
+                  </span>
+                )}
+              </Link>
+
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                className="flex flex-col items-center gap-1 cursor-pointer hover:text-red-500 transition"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+
+              {/* Admin Panel */}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-600 transition text-blue-600 font-semibold"
+                >
+                  <Package size={18} />
+                  Admin
+                </Link>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-600 transition"
+            >
+              <User size={18} />
+              Login
+            </Link>
+          )}
+
           <div className="hidden sm:flex flex-col items-center gap-1 cursor-pointer hover:text-blue-600 transition">
             <MessageCircle size={18} />
             Message
@@ -71,11 +125,20 @@ export default function Navbar() {
             <Heart size={18} />
             Orders
           </div>
+
+          {/* Cart with badge */}
           <Link
             to="/cart"
-            className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-600 transition"
+            className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-600 transition relative"
           >
-            <ShoppingCart size={18} />
+            <div className="relative">
+              <ShoppingCart size={18} />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 leading-none">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </div>
             My cart
           </Link>
         </div>

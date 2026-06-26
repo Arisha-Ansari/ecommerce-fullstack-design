@@ -1,43 +1,102 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from "react";
 
 export const CartContext = createContext();
 
-export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+const CART_STORAGE_KEY = "ecommerce_cart";
 
-  const addToCart = (product, quantity = 1) => {
-    const existing = cart.find(item => item._id === product._id);
-    
-    if (existing) {
-      setCart(cart.map(item =>
-        item._id === product._id
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity }]);
-    }
-  };
+// localStorage se cart load karo (app start hone par)
+const loadCartFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (err) {
+    console.error("Cart load error:", err);
+    return [];
+  }
+};
 
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item._id !== productId));
-  };
+// Cart ko localStorage mein save karo
+const saveCartToStorage = (cart) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  } catch (err) {
+    console.error("Cart save error:", err);
+  }
+};
 
-  const updateQuantity = (productId, quantity) => {
-    if (quantity === 0) {
-      removeFromCart(productId);
-    } else {
-      setCart(cart.map(item =>
-        item._id === productId ? { ...item, quantity } : item
-      ));
-    }
-  };
+export const CartProvider = ({ children }) => {
+  // State initialize karte waqt seedha localStorage se load karo
+  const [cart, setCart] = useState(() => loadCartFromStorage());
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Jab bhi cart change ho, localStorage update karo
+  useEffect(() => {
+    saveCartToStorage(cart);
+  }, [cart]);
+
+  // ── Product add karo ──────────────────────────────────────────
+  // ProductDetails se price already bulk-adjusted aata hai
+  const addToCart = useCallback((product, quantity = 1) => {
+    setCart((prev) => {
+      const existing = prev.find((item) => item._id === product._id);
+
+      if (existing) {
+        // Pehle se hai toh quantity badao, price update karo (tier change ho sakta hai)
+        return prev.map((item) =>
+          item._id === product._id
+            ? {
+                ...item,
+                quantity: item.quantity + quantity,
+                price: product.price, // latest bulk price
+              }
+            : item
+        );
+      }
+
+      // Naya item add karo
+      return [...prev, { ...product, quantity }];
+    });
+  }, []);
+
+  // ── Quantity update karo ──────────────────────────────────────
+  const updateQuantity = useCallback((productId, newQty) => {
+    if (newQty < 1) return;
+    setCart((prev) =>
+      prev.map((item) =>
+        item._id === productId ? { ...item, quantity: newQty } : item
+      )
+    );
+  }, []);
+
+  // ── Item remove karo ─────────────────────────────────────────
+  const removeFromCart = useCallback((productId) => {
+    setCart((prev) => prev.filter((item) => item._id !== productId));
+  }, []);
+
+  // ── Poora cart saaf karo ─────────────────────────────────────
+  const clearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
+  // ── Computed values ───────────────────────────────────────────
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, total }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        cartCount,   // navbar badge ke liye
+        cartTotal,   // quick total
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
-}
+};
