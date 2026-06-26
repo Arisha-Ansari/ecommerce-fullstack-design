@@ -66,14 +66,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ── Logout ────────────────────────────────────────────────
+  // ── Logout
   const logout = () => {
     localStorage.removeItem('auth_user');
     localStorage.removeItem('ecommerce_cart');
     setUser(null);
   };
 
-  // Shortcut — token directly access karne ke liye
+  // Shortcut 
   const token = user?.token || null;
   const isAdmin = user?.role === 'admin';
 
