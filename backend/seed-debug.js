@@ -37,7 +37,4 @@ const seedProducts = async () => {
   }
 };
 
-
-
-
 seedProducts()
