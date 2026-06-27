@@ -1,6 +1,10 @@
 import express from 'express';
 import Product from '../models/product.js';
 
+
+
+
+
 const router = express.Router();
 
 // GET all products
