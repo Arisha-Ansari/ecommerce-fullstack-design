@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Pencil, Trash2, X, Package } from 'lucide-react';
 
-const API = 'http://localhost:5000/api/products';
-
+const API = `${import.meta.env.VITE_API_URL}/api/products`;
 const emptyForm = {
   name: '',
   price: '',
