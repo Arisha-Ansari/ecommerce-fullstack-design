@@ -191,7 +191,7 @@ export default function ProductListing() {
             <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Brands</h3>
-                <ChevronDown size={16} />
+                <ChevronDown size={18} />
               </div>
               {brands.map(brand => (
                 <label key={brand.name} className="flex items-center gap-2 py-2 cursor-pointer">
@@ -236,7 +236,7 @@ export default function ProductListing() {
             <div className="bg-white lg:bg-transparent rounded-lg lg:rounded-none border border-gray-200 p-4 mb-4">
               <div className="flex items-center justify-between mb-3 cursor-pointer">
                 <h3 className="font-semibold text-sm">Condition</h3>
-                <ChevronDown size={16} />
+                <ChevronDown size={18} />
               </div>
               {conditions.map(cond => (
                 <label key={cond.name} className="flex items-center gap-2 py-2 cursor-pointer">
@@ -275,7 +275,7 @@ export default function ProductListing() {
               <div className="flex items-center gap-2 flex-wrap">
                 <label className="flex items-center gap-2 text-xs cursor-pointer">
                   <input type="checkbox" className="w-4 h-4 accent-blue-600" />
-                  Verified only
+                  Only Verified
                 </label>
                 <select className="border border-gray-200 rounded px-2 py-1 text-xs bg-white">
                   <option>Featured</option>
